@@ -496,33 +496,6 @@ Sur le serveur :
 
 ---
 
-## Difficultés rencontrées
-
-| Problème | Cause | Solution |
-|---|---|---|
-| `template: no such template` | La version `12.2-1` du template n'existait plus | Lister les versions disponibles avec `pveam available \| grep debian-12` |
-| `net0.bootproto: property is not defined in schema` | `bootproto` est une option de VM, pas de conteneur | Retirer `bootproto=static`, `ip=` suffit |
-| `curl: command not found` | L'image Debian standard est minimale | `apt install -y curl` avant le script Tailscale |
-| `tailscaled.sock: no such file or directory` | Pas d'accès à `/dev/net/tun` dans un conteneur non privilégié | Ajout des lignes `lxc.cgroup2` et `lxc.mount.entry` puis redémarrage |
-| `perl: warning: Setting locale failed` | Locale `en_US.UTF-8` non générée dans le conteneur | Installation du paquet `locales` + `locale-gen` |
-| MariaDB ne démarre pas : `status=226/NAMESPACE` | Les protections systemd de MariaDB nécessitent des namespaces interdits sans *nesting* | `pct set 105 --features nesting=1` + *override* systemd dans le script |
-| `bad substitution` et fichiers tronqués | Les longs blocs `cat << EOF` collés dans la console étaient corrompus | Tout regrouper dans **un script** transféré avec `wget` / `scp` puis `pct push` |
-| Le PHP n'était pas exécuté | La configuration Nginx d'origine ne transmettait pas les `.php` à PHP-FPM | Nouvelle configuration Nginx avec `fastcgi_pass` |
-| Glisser-déposer : `Impossible de créer projet2/mon-site` | 3 fichiers envoyés en parallèle tentaient de créer le même dossier au même moment | Le serveur vérifie que le dossier existe après un `mkdir` échoué (`@mkdir(...) && !is_dir(...)`) |
-
----
-
-## Perspectives d'évolution
-
-- **HTTPS** avec `tailscale cert` pour un certificat valide sur le nom MagicDNS du conteneur
-- **Git intégré** : cloner un dépôt, voir les modifications et faire des commits depuis l'interface
-- **Composer** pour les projets PHP (Symfony, Laravel)
-- **Terminal interactif** (xterm.js + WebSocket) pour les commandes qui posent des questions
-- **Sauvegarde automatique** des projets et des bases (`vzdump` planifié ou export vers mon NAS)
-- **Autocomplétion** avancée en remplaçant CodeMirror 5 par Monaco (le moteur de VS Code)
-
----
-
 ## Conclusion
 
 Ce projet m'a permis de construire **mon propre environnement de développement en ligne**, de la création du conteneur LXC jusqu'à une interface web complète. J'ai travaillé à la fois sur la partie **système et réseau** (Proxmox, conteneurs non privilégiés, systemd, Nginx, PHP-FPM, MariaDB, VPN Tailscale) et sur la partie **développement** (API PHP sécurisée, interface JavaScript sans framework, gestion de fichiers, SGBD, exécution de processus en arrière-plan).
